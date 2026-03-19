@@ -4,70 +4,46 @@
 /// </summary>
 public class CustomerServiceSolution {
     public static void Run() {
-        // Example code to see what's in the customer service queue:
-        // var service = new CustomerServiceSolution(10);
-        // Console.WriteLine(service);
-
         // Test Cases
 
-        // Test 1
-        // Scenario: Can I add one customer and then serve the customer?
-        // Expected Result: This should display the customer that was added
-        Console.WriteLine("Test 1");
-        var service = new CustomerServiceSolution(4);
-        service.AddNewCustomer();
-        service.ServeCustomer();
-        // Defect(s) Found: This found that the ServeCustomer should get the customer before deleting from the list
-
+        // Test 1: Default max size when invalid value provided
+        Console.WriteLine("Test 1: Default max size");
+        var service = new CustomerServiceSolution(0);
+        Console.WriteLine($"Max size should be 10: {service.GetMaxSize()}");
+        Console.WriteLine("Expected: 10");
         Console.WriteLine("=================");
 
-        // Test 2
-        // Scenario: Can I add two customers and then serve the customers in the right order?
-        // Expected Result: This should display the customers in the same order that they were entered
-        Console.WriteLine("Test 2");
-        service = new CustomerServiceSolution(4);
-        service.AddNewCustomer();
-        service.AddNewCustomer();
-        Console.WriteLine($"Before serving customers: {service}");
-        service.ServeCustomer();
-        service.ServeCustomer();
-        Console.WriteLine($"After serving customers: {service}");
-        // Defect(s) Found: None :)
-
+        // Test 2: Add customers and serve them
+        Console.WriteLine("Test 2: Add and serve customers");
+        service = new CustomerServiceSolution(3);
+        service.AddNewCustomer("Alice", "A123", "Login issue");
+        service.AddNewCustomer("Bob", "B456", "Payment problem");
+        Console.WriteLine($"Queue after adding: {service}");
+        service.ServeCustomer(); // Should display Alice
+        service.ServeCustomer(); // Should display Bob
+        Console.WriteLine($"Queue after serving: {service}");
         Console.WriteLine("=================");
 
-        // Test 3
-        // Scenario: Can I serve a customer if there is no customer?
-        // Expected Result: This should display some error message
-        Console.WriteLine("Test 3");
-        service = new CustomerServiceSolution(4);
-        service.ServeCustomer();
-        // Defect(s) Found: This found that I need to check the length in serve_customer and display an error message
-
+        // Test 3: Serve from empty queue
+        Console.WriteLine("Test 3: Serve from empty queue");
+        service = new CustomerServiceSolution(3);
+        service.ServeCustomer(); // Should display error
         Console.WriteLine("=================");
 
-        // Test 4
-        // Scenario: Does the max queue size get enforced?
-        // Expected Result: This should display some error message when the 5th one is added
-        Console.WriteLine("Test 4");
-        service = new CustomerServiceSolution(4);
-        service.AddNewCustomer();
-        service.AddNewCustomer();
-        service.AddNewCustomer();
-        service.AddNewCustomer();
-        service.AddNewCustomer();
-        Console.WriteLine($"Service Queue: {service}");
-        // Defect(s) Found: This found that I need to do >= instead of > in AddNewCustomer
-
+        // Test 4: Add to full queue
+        Console.WriteLine("Test 4: Add to full queue");
+        service = new CustomerServiceSolution(2);
+        service.AddNewCustomer("Charlie", "C789", "Refund");
+        service.AddNewCustomer("David", "D012", "Update info");
+        service.AddNewCustomer("Eve", "E345", "New account"); // Should display error
+        Console.WriteLine($"Queue: {service}");
         Console.WriteLine("=================");
 
-        // Test 5
-        // Scenario: Does the max size get defaulted to 10 if an invalid value is provided?
-        // Expected Result: It should display 10
-        Console.WriteLine("Test 5");
-        service = new CustomerServiceSolution(0);
-        Console.WriteLine($"Size should be 10: {service}");
-        // Defect(s) Found: None :)
+        // Test 5: Valid max size
+        Console.WriteLine("Test 5: Valid max size");
+        service = new CustomerServiceSolution(5);
+        Console.WriteLine($"Max size: {service.GetMaxSize()}");
+        Console.WriteLine("Expected: 5");
     }
 
     private readonly List<Customer> _queue = new();
@@ -78,6 +54,10 @@ public class CustomerServiceSolution {
             _maxSize = 10;
         else
             _maxSize = maxSize;
+    }
+
+    public int GetMaxSize() {
+        return _maxSize;
     }
 
     /// <summary>
@@ -106,7 +86,6 @@ public class CustomerServiceSolution {
     /// </summary>
     private void AddNewCustomer() {
         // Verify there is room in the service queue
-        // if (_queue.Count > _maxSize) // Defect 3 - should use >=
         if (_queue.Count >= _maxSize) {
             Console.WriteLine("Maximum Number of Customers in Queue.");
             return;
@@ -118,6 +97,24 @@ public class CustomerServiceSolution {
         var accountId = Console.ReadLine()!.Trim();
         Console.Write("Problem: ");
         var problem = Console.ReadLine()!.Trim();
+
+        // Create the customer object and add it to the queue
+        var customer = new Customer(name, accountId, problem);
+        _queue.Add(customer);
+    }
+
+    /// <summary>
+    /// Add a new customer with provided details to the queue.
+    /// </summary>
+    /// <param name="name">Customer name</param>
+    /// <param name="accountId">Account ID</param>
+    /// <param name="problem">Problem description</param>
+    private void AddNewCustomer(string name, string accountId, string problem) {
+        // Verify there is room in the service queue
+        if (_queue.Count >= _maxSize) {
+            Console.WriteLine("Maximum Number of Customers in Queue.");
+            return;
+        }
 
         // Create the customer object and add it to the queue
         var customer = new Customer(name, accountId, problem);
