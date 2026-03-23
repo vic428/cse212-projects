@@ -2,6 +2,15 @@ using System.Text.Json;
 
 public static class SetsAndMaps
 {
+    public static void Run()
+    {
+        var summaries = EarthquakeDailySummary();
+        Console.WriteLine("Today's Earthquake Summary:");
+        foreach (var summary in summaries)
+        {
+            Console.WriteLine(summary);
+        }
+    }
     /// <summary>
     /// The words parameter contains a list of two character 
     /// words (lower case, no duplicates). Using sets, find an O(n) 
@@ -22,7 +31,25 @@ public static class SetsAndMaps
     public static string[] FindPairs(string[] words)
     {
         // TODO Problem 1 - ADD YOUR CODE HERE
-        return [];
+        HashSet<string> seen = new HashSet<string>();
+        List<string> pairs = new List<string>();
+        
+        foreach (string word in words)
+        {
+            if (word[0] == word[1]) continue; // skip palindromes
+            
+            string rev = word[1].ToString() + word[0].ToString();
+            if (seen.Contains(rev))
+            {
+                pairs.Add($"{word} & {rev}");
+            }
+            else
+            {
+                seen.Add(word);
+            }
+        }
+        
+        return pairs.ToArray();
     }
 
     /// <summary>
@@ -43,6 +70,12 @@ public static class SetsAndMaps
         {
             var fields = line.Split(",");
             // TODO Problem 2 - ADD YOUR CODE HERE
+            string degree = fields[3];
+            if (!degrees.ContainsKey(degree))
+            {
+                degrees[degree] = 0;
+            }
+            degrees[degree]++;
         }
 
         return degrees;
@@ -67,7 +100,32 @@ public static class SetsAndMaps
     public static bool IsAnagram(string word1, string word2)
     {
         // TODO Problem 3 - ADD YOUR CODE HERE
-        return false;
+        Dictionary<char, int> count1 = new Dictionary<char, int>();
+        foreach (char c in word1.ToLower())
+        {
+            if (c != ' ')
+            {
+                if (!count1.ContainsKey(c)) count1[c] = 0;
+                count1[c]++;
+            }
+        }
+        
+        Dictionary<char, int> count2 = new Dictionary<char, int>();
+        foreach (char c in word2.ToLower())
+        {
+            if (c != ' ')
+            {
+                if (!count2.ContainsKey(c)) count2[c] = 0;
+                count2[c]++;
+            }
+        }
+        
+        if (count1.Count != count2.Count) return false;
+        foreach (var kvp in count1)
+        {
+            if (!count2.ContainsKey(kvp.Key) || count2[kvp.Key] != kvp.Value) return false;
+        }
+        return true;
     }
 
     /// <summary>
@@ -101,6 +159,10 @@ public static class SetsAndMaps
         // on those classes so that the call to Deserialize above works properly.
         // 2. Add code below to create a string out each place a earthquake has happened today and its magitude.
         // 3. Return an array of these string descriptions.
-        return [];
+        var earthquakes = featureCollection.features
+            .Where(f => f.properties.mag.HasValue)
+            .Select(f => $"{f.properties.place} - Mag {f.properties.mag.Value}")
+            .ToArray();
+        return earthquakes;
     }
 }

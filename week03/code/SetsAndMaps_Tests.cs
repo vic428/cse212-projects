@@ -341,6 +341,7 @@ public class EarthquakeDailySummaryTests
         foreach (string s in result)
         {
             Assert.IsTrue(s.Contains(" - Mag "), "String must contain a magnitude");
+            Console.WriteLine(s);  // Print each earthquake
         }
     }
 }
